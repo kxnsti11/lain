@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FLAPPY LAIN // THE WIRED</title>
+<title>LAIN // THE WIRED</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323:wght@400&display=swap');
 
@@ -17,8 +17,6 @@
     --red: #ff2266;
     --green: #00ff88;
     --text: #c8b8ff;
-    --pipe: #1a0a3a;
-    --pipe-edge: #7b2fff;
     --glow-purple: 0 0 8px #7b2fff, 0 0 20px #3d179966;
     --glow-cyan: 0 0 8px #00fff7, 0 0 20px #00fff766;
     --glow-red: 0 0 8px #ff2266, 0 0 20px #ff226666;
@@ -31,13 +29,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     overflow: hidden;
     font-family: 'Share Tech Mono', monospace;
     color: var(--text);
   }
 
-  /* CRT scanline overlay */
+  /* CRT scanlines */
   body::before {
     content: '';
     position: fixed;
@@ -46,8 +44,8 @@
       0deg,
       transparent,
       transparent 2px,
-      rgba(0,0,0,0.18) 2px,
-      rgba(0,0,0,0.18) 4px
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
     );
     pointer-events: none;
     z-index: 9999;
@@ -67,9 +65,9 @@
   @keyframes flicker {
     0%,100% { opacity: 1; }
     92% { opacity: 1; }
-    93% { opacity: 0.4; }
+    93% { opacity: 0.35; }
     94% { opacity: 1; }
-    96% { opacity: 0.6; }
+    96% { opacity: 0.55; }
     97% { opacity: 1; }
   }
 
@@ -78,25 +76,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
   #hud-top {
-    width: 400px;
+    width: 560px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-family: 'VT323', monospace;
-    font-size: 22px;
+    font-size: 28px;
     color: var(--cyan);
     text-shadow: var(--glow-cyan);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
   }
 
   #canvas-container {
     position: relative;
     border: 1px solid var(--wired-dim);
-    box-shadow: 0 0 30px #7b2fff44, inset 0 0 30px #05050a88;
+    box-shadow: 0 0 40px #7b2fff55, 0 0 80px #7b2fff22, inset 0 0 40px #05050a88;
   }
 
   canvas {
@@ -105,12 +103,12 @@
   }
 
   #hud-bottom {
-    width: 400px;
+    width: 560px;
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--wired-dim);
-    letter-spacing: 1px;
+    letter-spacing: 2px;
   }
 
   /* Overlay screens */
@@ -121,17 +119,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(5,5,10,0.92);
+    background: rgba(5,5,10,0.93);
     z-index: 10;
-    gap: 18px;
-    padding: 30px;
+    gap: 20px;
+    padding: 40px;
   }
 
   .screen.hidden { display: none; }
 
   .screen-title {
     font-family: 'VT323', monospace;
-    font-size: 52px;
+    font-size: 72px;
     color: var(--wired);
     text-shadow: var(--glow-purple);
     text-align: center;
@@ -141,78 +139,78 @@
 
   @keyframes pulse-title {
     0%,100% { text-shadow: 0 0 8px #7b2fff, 0 0 30px #7b2fff88; }
-    50% { text-shadow: 0 0 15px #7b2fff, 0 0 50px #7b2fffaa, 0 0 80px #7b2fff44; }
+    50%      { text-shadow: 0 0 18px #7b2fff, 0 0 60px #7b2fffaa, 0 0 100px #7b2fff33; }
   }
 
   .screen-sub {
     font-family: 'VT323', monospace;
-    font-size: 26px;
+    font-size: 32px;
     color: var(--cyan);
     text-shadow: var(--glow-cyan);
     text-align: center;
-    letter-spacing: 3px;
+    letter-spacing: 4px;
   }
 
   .screen-text {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text);
     text-align: center;
-    line-height: 1.8;
-    max-width: 300px;
+    line-height: 1.9;
+    max-width: 380px;
     opacity: 0.7;
   }
 
   .lain-quote {
-    font-size: 13px;
+    font-size: 15px;
     color: var(--wired);
     text-align: center;
     font-style: italic;
-    opacity: 0.6;
-    max-width: 300px;
-    line-height: 1.6;
+    opacity: 0.65;
+    max-width: 380px;
+    line-height: 1.7;
   }
 
   .blink-prompt {
     font-family: 'VT323', monospace;
-    font-size: 28px;
+    font-size: 34px;
     color: var(--green);
-    text-shadow: 0 0 8px var(--green);
+    text-shadow: 0 0 10px var(--green);
     animation: blink 1.2s step-end infinite;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
   }
 
   @keyframes blink {
     0%,100% { opacity: 1; }
-    50% { opacity: 0; }
+    50%      { opacity: 0; }
   }
 
   .score-display {
     font-family: 'VT323', monospace;
-    font-size: 36px;
+    font-size: 44px;
     color: var(--cyan);
     text-shadow: var(--glow-cyan);
     text-align: center;
   }
 
   .divider {
-    width: 200px;
+    width: 260px;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--wired-dim), transparent);
   }
 
   #glitch-text {
     position: absolute;
-    top: 15px;
-    left: 0;
-    right: 0;
+    top: 18px;
+    left: 0; right: 0;
     text-align: center;
     font-family: 'VT323', monospace;
-    font-size: 14px;
+    font-size: 18px;
     color: var(--red);
     text-shadow: var(--glow-red);
     opacity: 0;
-    letter-spacing: 4px;
+    letter-spacing: 6px;
     pointer-events: none;
+    transition: opacity 0.05s;
   }
 </style>
 </head>
@@ -225,7 +223,7 @@
   </div>
 
   <div id="canvas-container">
-    <canvas id="canvas" width="400" height="550"></canvas>
+    <canvas id="canvas" width="560" height="700"></canvas>
 
     <!-- START SCREEN -->
     <div class="screen" id="start-screen">
@@ -240,8 +238,8 @@
 
     <!-- DEAD SCREEN -->
     <div class="screen hidden" id="dead-screen">
-      <div class="screen-title" style="color: var(--red); text-shadow: var(--glow-red);">DISCONNECTED</div>
-      <div class="screen-sub" style="color: var(--red);">// SIGNAL LOST //</div>
+      <div class="screen-title" style="color:var(--red);text-shadow:var(--glow-red);">DISCONNECTED</div>
+      <div class="screen-sub" style="color:var(--red);">// SIGNAL LOST //</div>
       <div class="divider"></div>
       <div class="score-display" id="dead-score"></div>
       <div class="lain-quote" id="death-quote"></div>
@@ -259,91 +257,217 @@
 </div>
 
 <script>
+// ─────────────────────────────────────────────
+//  CANVAS SETUP
+// ─────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const W = canvas.width, H = canvas.height;
+const ctx    = canvas.getContext('2d');
+const W = canvas.width;   // 560
+const H = canvas.height;  // 700
 
-// Game state
-let state = 'start'; // start, playing, dead
-let score = 0, best = 0;
-let animFrame;
-let lastTime = 0;
+// ─────────────────────────────────────────────
+//  AUDIO ENGINE  (retro chiptune via Web Audio)
+// ─────────────────────────────────────────────
+let audioCtx = null;
+function ac() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Low-level: play an oscillator with optional frequency sweep
+function beep({ freq = 440, endFreq = null, type = 'square', dur = 0.1, vol = 0.18, delay = 0 } = {}) {
+  try {
+    const a = ac();
+    const t0 = a.currentTime + delay;
+    const osc  = a.createOscillator();
+    const gain = a.createGain();
+    // Bit-crusher style: quantise gain steps for that lo-fi crunch
+    osc.connect(gain);
+    gain.connect(a.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.setValueAtTime(vol, t0 + dur * 0.7);
+    gain.gain.linearRampToValueAtTime(0, t0 + dur);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.01);
+  } catch(e) {}
+}
+
+// White noise burst
+function noise({ dur = 0.08, vol = 0.25, filterFreq = 600, delay = 0 } = {}) {
+  try {
+    const a   = ac();
+    const t0  = a.currentTime + delay;
+    const buf = a.createBuffer(1, Math.ceil(a.sampleRate * dur), a.sampleRate);
+    const d   = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src    = a.createBufferSource();
+    const gain   = a.createGain();
+    const filter = a.createBiquadFilter();
+    filter.type            = 'bandpass';
+    filter.frequency.value = filterFreq;
+    filter.Q.value         = 1.2;
+    src.buffer = buf;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(a.destination);
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.linearRampToValueAtTime(0, t0 + dur);
+    src.start(t0);
+    src.stop(t0 + dur + 0.01);
+  } catch(e) {}
+}
+
+// ── Sound events ──────────────────────────────
+function soundStart() {
+  // Ascending NES-style arpeggio boot sequence
+  const notes = [220, 277, 330, 415, 523, 659, 880];
+  notes.forEach((f, i) => beep({ freq: f, type: 'square', dur: 0.07, vol: 0.14, delay: i * 0.055 }));
+  // Final shimmer
+  beep({ freq: 1320, type: 'sine', dur: 0.35, vol: 0.10, delay: notes.length * 0.055 });
+}
+
+function soundLift() {
+  // Short square blip — classic NES jump click
+  beep({ freq: 523, endFreq: 660, type: 'square', dur: 0.045, vol: 0.09 });
+}
+
+function soundScore() {
+  // Two-note coin collect ding
+  beep({ freq: 784, type: 'square', dur: 0.06, vol: 0.15 });
+  beep({ freq: 1047, type: 'square', dur: 0.12, vol: 0.12, delay: 0.06 });
+}
+
+function soundDie() {
+  // NES death: descending noise crash + falling tone
+  noise({ dur: 0.12, vol: 0.35, filterFreq: 900 });
+  noise({ dur: 0.08, vol: 0.20, filterFreq: 300, delay: 0.08 });
+  beep({ freq: 440, endFreq: 55,  type: 'square',   dur: 0.55, vol: 0.20, delay: 0.04 });
+  beep({ freq: 330, endFreq: 40,  type: 'sawtooth',  dur: 0.45, vol: 0.12, delay: 0.12 });
+  // Final low thud
+  beep({ freq: 80,  type: 'sine', dur: 0.30, vol: 0.18, delay: 0.50 });
+}
+
+// ─────────────────────────────────────────────
+//  GAME STATE
+// ─────────────────────────────────────────────
+let state  = 'start'; // 'start' | 'playing' | 'dead'
+let score  = 0;
+let best   = 0;
 
 // Bird
 const bird = {
-  x: 80, y: H / 2,
+  x: 100, y: H / 2,
   vy: 0,
-  drift: 1.3,       // constant downward speed when not pressing space
-  liftForce: -1.8,  // upward velocity applied each frame space is held
-  w: 22, h: 22,
+  drift:     1.4,   // px/frame downward when space released
+  liftForce: -1.9,  // px/frame upward when space held
+  w: 28, h: 28,
   trail: [],
   glitchTimer: 0,
 };
 
-let spaceHeld = false;
+let spaceHeld        = false;
+let deadScreenAnim   = false; // blocks restart during animation
 
 // Pipes
-let pipes = [];
-const PIPE_W = 52;
-const GAP = 172;
-const PIPE_SPEED = 1.9;
-let pipeTimer = 0;
-const PIPE_INTERVAL = 110; // frames
+let pipes        = [];
+const PIPE_W     = 64;
+const GAP        = 188;
+const PIPE_SPEED = 2.1;
+let pipeTimer    = 0;
+const PIPE_INTVL = 115;
 
-// Background elements
-let bgStars = [];
-let bgWires = [];
-let bgTimer = 0;
+// Particles
 let particles = [];
 
-// Lain death quotes
-const quotes = [
+// Background
+let bgStars = [];
+let bgWires = [];
+let bgTick  = 0;
+
+// Lain quotes for death screen
+const QUOTES = [
   '"Close this world, open the next."',
   '"If you\'re not remembered, you never existed."',
-  '"The border between the real world and the Wired is becoming more and more ambiguous."',
+  '"The border between the real world and\nthe Wired is becoming more and more ambiguous."',
   '"Present day. Present time. Hahaha."',
   '"The flesh is a device for the soul to be expressed through."',
   '"Let\'s all love Lain."',
   '"I am connected. Therefore I am."',
+  '"No matter where you go, everyone is connected."',
 ];
 
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
 function init() {
-  // Generate background stars
   bgStars = [];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 90; i++) {
     bgStars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      size: Math.random() * 1.5 + 0.3,
+      x:       Math.random() * W,
+      y:       Math.random() * H,
+      size:    Math.random() * 1.8 + 0.3,
       flicker: Math.random() * Math.PI * 2,
-      speed: Math.random() * 0.3 + 0.1,
+      speed:   Math.random() * 0.3 + 0.08,
     });
   }
-  // Generate background wire lines (horizontal noise lines)
   bgWires = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 10; i++) {
     bgWires.push({
-      y: Math.random() * H,
-      opacity: Math.random() * 0.15 + 0.05,
-      speed: Math.random() * 0.4 + 0.2,
-      offset: Math.random() * W,
+      y:       Math.random() * H,
+      opacity: Math.random() * 0.14 + 0.04,
+      speed:   Math.random() * 0.5 + 0.2,
+      offset:  Math.random() * W,
     });
   }
 }
 
 function resetGame() {
-  bird.x = 80;
-  bird.y = H / 2;
-  bird.vy = 0;
-  bird.trail = [];
-  bird.glitchTimer = 0;
-  pipes = [];
-  particles = [];
-  pipeTimer = 0;
+  bird.x = 100; bird.y = H / 2; bird.vy = 0;
+  bird.trail = []; bird.glitchTimer = 0;
+  pipes = []; particles = []; pipeTimer = 0;
   score = 0;
   updateHUD();
 }
 
+// ─────────────────────────────────────────────
+//  HUD
+// ─────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('score-display').textContent = String(score).padStart(3,'0');
+  document.getElementById('best-display').textContent  = String(best).padStart(3,'0');
+}
+
+// ─────────────────────────────────────────────
+//  DEATH SCREEN ANIMATION
+// ─────────────────────────────────────────────
+function showDeadScreenAnimated() {
+  deadScreenAnim = true;
+  const el = document.getElementById('dead-screen');
+  el.classList.remove('hidden');
+  el.style.opacity = '0';
+
+  let frame = 0;
+  (function tick() {
+    frame++;
+    if (frame < 24) {
+      // CRT glitch flicker phase
+      el.style.opacity = (frame % 4 === 0) ? '0' : String(Math.random() * 0.6 + 0.1);
+    } else {
+      // Smooth fade-in phase
+      const p = Math.min((frame - 24) / 45, 1);
+      el.style.opacity = String(p);
+      if (p >= 1) { el.style.opacity = '1'; deadScreenAnim = false; return; }
+    }
+    requestAnimationFrame(tick);
+  })();
+}
+
+// ─────────────────────────────────────────────
+//  JUMP / STATE TRANSITION
+// ─────────────────────────────────────────────
 function jump() {
   if (state === 'start') {
     state = 'playing';
@@ -351,24 +475,24 @@ function jump() {
     document.getElementById('start-screen').classList.add('hidden');
     return;
   }
-  if (state === 'dead') {
-    if (deadScreenAnimating) return; // don't allow restart mid-animation
+  if (state === 'dead' && !deadScreenAnim) {
     document.getElementById('dead-screen').classList.add('hidden');
     resetGame();
     state = 'playing';
     soundStart();
-    return;
   }
 }
 
-function spawnJumpParticles() {
-  for (let i = 0; i < 6; i++) {
+// ─────────────────────────────────────────────
+//  PARTICLES
+// ─────────────────────────────────────────────
+function spawnLiftParticles() {
+  for (let i = 0; i < 4; i++) {
     particles.push({
-      x: bird.x, y: bird.y,
-      vx: (Math.random() - 0.5) * 3,
-      vy: (Math.random() - 0.5) * 3,
-      life: 1,
-      decay: Math.random() * 0.06 + 0.04,
+      x: bird.x, y: bird.y + 8,
+      vx: (Math.random() - 0.5) * 2.5,
+      vy: Math.random() * 2 + 0.5,
+      life: 1, decay: Math.random() * 0.07 + 0.05,
       color: Math.random() > 0.5 ? '#7b2fff' : '#00fff7',
       size: Math.random() * 3 + 1,
     });
@@ -376,318 +500,203 @@ function spawnJumpParticles() {
 }
 
 function spawnDeathParticles() {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 40; i++) {
+    const spd = Math.random() * 7 + 2;
+    const ang = Math.random() * Math.PI * 2;
     particles.push({
       x: bird.x, y: bird.y,
-      vx: (Math.random() - 0.5) * 8,
-      vy: (Math.random() - 0.5) * 8,
-      life: 1,
-      decay: Math.random() * 0.025 + 0.01,
-      color: ['#ff2266','#7b2fff','#00fff7','#ffffff'][Math.floor(Math.random()*4)],
+      vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+      life: 1, decay: Math.random() * 0.02 + 0.008,
+      color: ['#ff2266','#7b2fff','#00fff7','#ffffff','#ff2266'][Math.floor(Math.random()*5)],
+      size: Math.random() * 6 + 2,
+    });
+  }
+}
+
+function spawnScoreParticles() {
+  for (let i = 0; i < 10; i++) {
+    particles.push({
+      x: bird.x, y: bird.y,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6,
+      life: 1, decay: 0.04,
+      color: '#00ff88',
       size: Math.random() * 5 + 1,
     });
   }
 }
 
+// ─────────────────────────────────────────────
+//  PIPES
+// ─────────────────────────────────────────────
 function addPipe() {
-  const minTop = 60;
-  const maxTop = H - GAP - 60;
-  const topH = Math.random() * (maxTop - minTop) + minTop;
-  pipes.push({
-    x: W + 10,
-    topH,
-    bottomY: topH + GAP,
-    scored: false,
-    glitch: 0,
-  });
+  const minTop = 70;
+  const maxTop = H - GAP - 70;
+  const topH   = Math.random() * (maxTop - minTop) + minTop;
+  pipes.push({ x: W + 12, topH, bottomY: topH + GAP, scored: false, glitch: 0 });
 }
 
-function checkCollision(pipe) {
-  const bx = bird.x - bird.w / 2 + 3;
-  const by = bird.y - bird.h / 2 + 3;
-  const bw = bird.w - 6;
-  const bh = bird.h - 6;
-  // Top pipe
-  if (bx < pipe.x + PIPE_W && bx + bw > pipe.x) {
-    if (by < pipe.topH || by + bh > pipe.bottomY) return true;
+function checkCollision(p) {
+  const bx = bird.x - bird.w / 2 + 4;
+  const by = bird.y - bird.h / 2 + 4;
+  const bw = bird.w - 8;
+  const bh = bird.h - 8;
+  if (bx < p.x + PIPE_W && bx + bw > p.x) {
+    if (by < p.topH || by + bh > p.bottomY) return true;
   }
   return false;
 }
 
+// ─────────────────────────────────────────────
+//  DIE
+// ─────────────────────────────────────────────
 function die() {
   state = 'dead';
   soundDie();
   spawnDeathParticles();
-  // Glitch text flash
+
   const gt = document.getElementById('glitch-text');
   gt.style.opacity = '1';
-  setTimeout(() => { gt.style.opacity = '0'; }, 600);
+  setTimeout(() => { gt.style.opacity = '0'; }, 700);
 
   if (score > best) best = score;
   updateHUD();
 
-  const qs = document.getElementById('dead-score');
-  qs.textContent = `SCORE: ${String(score).padStart(3,'0')}  |  BEST: ${String(best).padStart(3,'0')}`;
-  document.getElementById('death-quote').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+  document.getElementById('dead-score').textContent =
+    `SCORE: ${String(score).padStart(3,'0')}  |  BEST: ${String(best).padStart(3,'0')}`;
+  document.getElementById('death-quote').textContent =
+    QUOTES[Math.floor(Math.random() * QUOTES.length)];
 
-  // Delay the screen slightly so death particles are visible first
-  setTimeout(() => showDeadScreenAnimated(), 420);
+  setTimeout(showDeadScreenAnimated, 480);
 }
 
-// ---- AUDIO ENGINE ----
-let audioCtx = null;
-function getAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-function playTone(freq, type, duration, vol, startFreq) {
-  try {
-    const ac = getAudio();
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    osc.connect(gain);
-    gain.connect(ac.destination);
-    osc.type = type;
-    if (startFreq) {
-      osc.frequency.setValueAtTime(startFreq, ac.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(freq, ac.currentTime + duration);
-    } else {
-      osc.frequency.setValueAtTime(freq, ac.currentTime);
-    }
-    gain.gain.setValueAtTime(vol, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
-    osc.start(ac.currentTime);
-    osc.stop(ac.currentTime + duration);
-  } catch(e) {}
-}
-
-function playNoise(duration, vol) {
-  try {
-    const ac = getAudio();
-    const bufSize = ac.sampleRate * duration;
-    const buf = ac.createBuffer(1, bufSize, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    const gain = ac.createGain();
-    const filter = ac.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 800;
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(ac.destination);
-    gain.gain.setValueAtTime(vol, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
-    src.start();
-    src.stop(ac.currentTime + duration);
-  } catch(e) {}
-}
-
-function soundStart() {
-  // Rising wired-connect tone sequence
-  playTone(220, 'square', 0.08, 0.15);
-  setTimeout(() => playTone(330, 'square', 0.08, 0.15), 80);
-  setTimeout(() => playTone(440, 'square', 0.08, 0.15), 160);
-  setTimeout(() => playTone(660, 'sine', 0.25, 0.2), 240);
-  setTimeout(() => playTone(880, 'sine', 0.4, 0.15), 380);
-}
-
-function soundLift() {
-  playTone(300, 'square', 0.06, 0.04);
-}
-
-function soundScore() {
-  playTone(660, 'sine', 0.12, 0.12);
-  setTimeout(() => playTone(880, 'sine', 0.18, 0.1), 100);
-}
-
-function soundDie() {
-  // Distorted crash + signal lost descending tone
-  playNoise(0.18, 0.3);
-  playTone(440, 'sawtooth', 0.6, 0.2, 880);
-  setTimeout(() => playTone(200, 'sawtooth', 0.4, 0.15, 400), 100);
-  setTimeout(() => playTone(80, 'sine', 0.5, 0.1, 200), 280);
-  setTimeout(() => playNoise(0.1, 0.1), 400);
-}
-
-// ---- DEATH SCREEN ANIMATION ----
-let deadScreenAlpha = 0;
-let deadScreenAnimating = false;
-
-function showDeadScreenAnimated() {
-  deadScreenAlpha = 0;
-  deadScreenAnimating = true;
-  const el = document.getElementById('dead-screen');
-  el.classList.remove('hidden');
-  el.style.opacity = '0';
-  el.style.transition = 'none';
-
-  // Animate alpha via JS for precise CRT-glitch feel
-  let frame = 0;
-  function animStep() {
-    frame++;
-    // Glitchy flicker for first 20 frames, then smooth fade
-    if (frame < 20) {
-      const flicker = frame % 3 === 0 ? 0 : Math.min(frame / 20, 1) * (0.3 + Math.random() * 0.5);
-      el.style.opacity = flicker;
-    } else {
-      const progress = (frame - 20) / 40;
-      el.style.opacity = Math.min(progress, 1);
-      if (progress >= 1) { el.style.opacity = 1; deadScreenAnimating = false; return; }
-    }
-    requestAnimationFrame(animStep);
-  }
-  requestAnimationFrame(animStep);
-}
-
-function updateHUD() {
-  document.getElementById('score-display').textContent = String(score).padStart(3,'0');
-  document.getElementById('best-display').textContent = String(best).padStart(3,'0');
-}
-
-// ---- DRAW FUNCTIONS ----
-
+// ─────────────────────────────────────────────
+//  DRAW — BACKGROUND
+// ─────────────────────────────────────────────
 function drawBackground(t) {
-  // Base dark gradient
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#05030f');
+  grad.addColorStop(0,   '#05030f');
   grad.addColorStop(0.5, '#0a0518');
-  grad.addColorStop(1, '#030210');
+  grad.addColorStop(1,   '#030210');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
-  // Stars with flicker
+  // Stars
   bgStars.forEach(s => {
-    const flick = 0.5 + 0.5 * Math.sin(t * 0.002 * s.speed + s.flicker);
-    ctx.globalAlpha = flick * 0.7;
-    ctx.fillStyle = Math.random() > 0.98 ? '#00fff7' : '#c8b8ff';
+    const flick = 0.4 + 0.6 * Math.sin(t * 0.0018 * s.speed + s.flicker);
+    ctx.globalAlpha = flick * 0.75;
+    ctx.fillStyle = Math.random() > 0.985 ? '#00fff7' : '#c8b8ff';
     ctx.fillRect(s.x, s.y, s.size, s.size);
   });
   ctx.globalAlpha = 1;
 
-  // Horizontal wire lines (Lain aesthetic)
+  // Horizontal wire lines
   bgWires.forEach(w => {
-    const x = (w.offset - t * w.speed * 0.5) % (W * 1.5) - W * 0.25;
-    ctx.globalAlpha = w.opacity * (0.7 + 0.3 * Math.sin(t * 0.003));
+    ctx.globalAlpha = w.opacity * (0.6 + 0.4 * Math.sin(t * 0.0025 + w.offset));
     ctx.strokeStyle = '#7b2fff';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth   = 0.5;
     ctx.beginPath();
-    ctx.moveTo(0, w.y);
-    ctx.lineTo(W, w.y);
+    ctx.moveTo(0, w.y); ctx.lineTo(W, w.y);
     ctx.stroke();
   });
   ctx.globalAlpha = 1;
 
-  // Occasional glitch horizontal lines
-  if (Math.random() < 0.015) {
+  // Random glitch scanline
+  if (Math.random() < 0.018) {
     const gy = Math.random() * H;
-    const gw = Math.random() * 120 + 20;
+    const gw = Math.random() * 160 + 30;
     const gx = Math.random() * (W - gw);
-    ctx.globalAlpha = Math.random() * 0.3;
+    ctx.globalAlpha = Math.random() * 0.28;
     ctx.fillStyle = Math.random() > 0.5 ? '#7b2fff' : '#00fff7';
     ctx.fillRect(gx, gy, gw, Math.random() * 2 + 0.5);
     ctx.globalAlpha = 1;
   }
 }
 
-function drawPipe(pipe, t) {
-  // Glitch the pipe occasionally
-  const gx = pipe.glitch > 0 ? (Math.random() - 0.5) * 4 : 0;
-  const px = pipe.x + gx;
+// ─────────────────────────────────────────────
+//  DRAW — PIPES
+// ─────────────────────────────────────────────
+function drawPipe(pipe) {
+  const gx = pipe.glitch > 0 ? (Math.random() - 0.5) * 5 : 0;
+  const px  = pipe.x + gx;
 
-  // Top pipe body
-  const pg1 = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
-  pg1.addColorStop(0, '#0d0524');
-  pg1.addColorStop(0.3, '#1a0a3a');
-  pg1.addColorStop(1, '#0a0318');
-  ctx.fillStyle = pg1;
+  // ── Top pipe body
+  const g1 = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
+  g1.addColorStop(0,   '#0d0524');
+  g1.addColorStop(0.4, '#1a0a3a');
+  g1.addColorStop(1,   '#0a0318');
+  ctx.fillStyle = g1;
   ctx.fillRect(px, 0, PIPE_W, pipe.topH);
 
-  // Top pipe decorative lines
-  for (let i = 0; i < 3; i++) {
-    ctx.globalAlpha = 0.3;
+  // circuit lines inside top pipe
+  for (let i = 0; i < 4; i++) {
+    ctx.globalAlpha = 0.25;
     ctx.strokeStyle = '#7b2fff';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth   = 0.5;
     ctx.beginPath();
-    ctx.moveTo(px + 8 + i * 14, 0);
-    ctx.lineTo(px + 8 + i * 14, pipe.topH);
+    ctx.moveTo(px + 10 + i * 14, 0);
+    ctx.lineTo(px + 10 + i * 14, pipe.topH);
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
 
-  // Top pipe right edge glow
-  ctx.shadowColor = '#7b2fff';
-  ctx.shadowBlur = 8;
-  ctx.strokeStyle = '#7b2fff';
-  ctx.lineWidth = 1.5;
+  // top pipe glowing edges
+  ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 10;
+  ctx.strokeStyle = '#7b2fff'; ctx.lineWidth  = 1.5;
   ctx.beginPath();
-  ctx.moveTo(px, 0);
-  ctx.lineTo(px, pipe.topH);
-  ctx.moveTo(px + PIPE_W, 0);
-  ctx.lineTo(px + PIPE_W, pipe.topH);
+  ctx.moveTo(px, 0);          ctx.lineTo(px, pipe.topH);
+  ctx.moveTo(px + PIPE_W, 0); ctx.lineTo(px + PIPE_W, pipe.topH);
   ctx.stroke();
 
-  // Top pipe mouth
+  // top pipe mouth
   ctx.fillStyle = '#1a0a3a';
-  ctx.fillRect(px - 4, pipe.topH - 16, PIPE_W + 8, 16);
-  ctx.strokeStyle = '#00fff7';
-  ctx.lineWidth = 1;
-  ctx.shadowColor = '#00fff7';
-  ctx.shadowBlur = 6;
-  ctx.strokeRect(px - 4, pipe.topH - 16, PIPE_W + 8, 16);
+  ctx.fillRect(px - 5, pipe.topH - 20, PIPE_W + 10, 20);
+  ctx.shadowColor = '#00fff7'; ctx.shadowBlur = 8;
+  ctx.strokeStyle = '#00fff7'; ctx.lineWidth  = 1.2;
+  ctx.strokeRect(px - 5, pipe.topH - 20, PIPE_W + 10, 20);
 
-  // Bottom pipe
-  const pg2 = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
-  pg2.addColorStop(0, '#0d0524');
-  pg2.addColorStop(0.3, '#1a0a3a');
-  pg2.addColorStop(1, '#0a0318');
-  ctx.fillStyle = pg2;
+  // ── Bottom pipe body
+  const g2 = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
+  g2.addColorStop(0,   '#0d0524');
+  g2.addColorStop(0.4, '#1a0a3a');
+  g2.addColorStop(1,   '#0a0318');
+  ctx.fillStyle = g2;
   ctx.shadowBlur = 0;
   ctx.fillRect(px, pipe.bottomY, PIPE_W, H - pipe.bottomY);
 
-  for (let i = 0; i < 3; i++) {
-    ctx.globalAlpha = 0.3;
-    ctx.strokeStyle = '#7b2fff';
-    ctx.lineWidth = 0.5;
+  for (let i = 0; i < 4; i++) {
+    ctx.globalAlpha = 0.25;
+    ctx.strokeStyle = '#7b2fff'; ctx.lineWidth = 0.5;
     ctx.beginPath();
-    ctx.moveTo(px + 8 + i * 14, pipe.bottomY);
-    ctx.lineTo(px + 8 + i * 14, H);
+    ctx.moveTo(px + 10 + i * 14, pipe.bottomY);
+    ctx.lineTo(px + 10 + i * 14, H);
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
 
-  ctx.shadowColor = '#7b2fff';
-  ctx.shadowBlur = 8;
-  ctx.strokeStyle = '#7b2fff';
-  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 10;
+  ctx.strokeStyle = '#7b2fff'; ctx.lineWidth  = 1.5;
   ctx.beginPath();
-  ctx.moveTo(px, pipe.bottomY);
-  ctx.lineTo(px, H);
-  ctx.moveTo(px + PIPE_W, pipe.bottomY);
-  ctx.lineTo(px + PIPE_W, H);
+  ctx.moveTo(px, pipe.bottomY);          ctx.lineTo(px, H);
+  ctx.moveTo(px + PIPE_W, pipe.bottomY); ctx.lineTo(px + PIPE_W, H);
   ctx.stroke();
 
+  // bottom pipe mouth
   ctx.fillStyle = '#1a0a3a';
-  ctx.fillRect(px - 4, pipe.bottomY, PIPE_W + 8, 16);
-  ctx.shadowColor = '#00fff7';
-  ctx.shadowBlur = 6;
-  ctx.strokeStyle = '#00fff7';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(px - 4, pipe.bottomY, PIPE_W + 8, 16);
+  ctx.fillRect(px - 5, pipe.bottomY, PIPE_W + 10, 20);
+  ctx.shadowColor = '#00fff7'; ctx.shadowBlur = 8;
+  ctx.strokeStyle = '#00fff7'; ctx.lineWidth  = 1.2;
+  ctx.strokeRect(px - 5, pipe.bottomY, PIPE_W + 10, 20);
 
   ctx.shadowBlur = 0;
 
-  // Circuit trace decoration in gap
-  const midGap = pipe.topH + GAP / 2;
-  ctx.globalAlpha = 0.12;
-  ctx.strokeStyle = '#7b2fff';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([3, 6]);
+  // dashed centre-gap trace
+  const mid = pipe.topH + GAP / 2;
+  ctx.globalAlpha = 0.10;
+  ctx.strokeStyle = '#7b2fff'; ctx.lineWidth = 1;
+  ctx.setLineDash([4, 8]);
   ctx.beginPath();
-  ctx.moveTo(px - 4, midGap);
-  ctx.lineTo(px + PIPE_W + 4, midGap);
+  ctx.moveTo(px - 5, mid); ctx.lineTo(px + PIPE_W + 5, mid);
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
@@ -695,131 +704,130 @@ function drawPipe(pipe, t) {
   if (pipe.glitch > 0) pipe.glitch--;
 }
 
-function drawBird(t) {
-  // Trail
+// ─────────────────────────────────────────────
+//  DRAW — BIRD (pixel Lain)
+// ─────────────────────────────────────────────
+function drawBird() {
+  // Ghost trail
   bird.trail.forEach((pos, i) => {
-    const a = (i / bird.trail.length) * 0.5;
+    const a = (i / bird.trail.length) * 0.45;
     ctx.globalAlpha = a;
-    ctx.fillStyle = '#7b2fff';
-    ctx.shadowColor = '#7b2fff';
-    ctx.shadowBlur = 6;
-    ctx.fillRect(pos.x - 3, pos.y - 3, 6, 6);
+    ctx.fillStyle   = '#7b2fff';
+    ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 8;
+    ctx.fillRect(pos.x - 4, pos.y - 4, 8, 8);
   });
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
-  const bx = bird.x;
-  const by = bird.y;
+  const goff = bird.glitchTimer > 0 ? (Math.random() - 0.5) * 5 : 0;
+  const tilt  = bird.vy * 0.35; // visual tilt with velocity
+  const px = Math.floor(bird.x - 11 + goff);
+  const py = Math.floor(bird.y - 11 + tilt);
 
-  // Glitch offset
-  const goff = bird.glitchTimer > 0 ? (Math.random() - 0.5) * 4 : 0;
+  // Outer purple glow
+  ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 20;
 
-  // Bird body — pixelated Lain-head silhouette
-  // Outer glow
-  ctx.shadowColor = '#7b2fff';
-  ctx.shadowBlur = 16;
-
-  // Body
-  ctx.fillStyle = '#c8b8ff';
-  // Pixel art 14x14 "character" shape
-  const px = Math.floor(bx - 9 + goff);
-  const py = Math.floor(by - 9 + (bird.vy * 0.3));
-
-  // Draw a simple pixel character
   // Head
   ctx.fillStyle = '#e8d8ff';
-  ctx.fillRect(px + 2, py, 10, 10);
-  // Eyes — two cyan dots
-  ctx.fillStyle = '#00fff7';
-  ctx.shadowColor = '#00fff7';
-  ctx.shadowBlur = 8;
-  ctx.fillRect(px + 3, py + 3, 2, 2);
-  ctx.fillRect(px + 8, py + 3, 2, 2);
+  ctx.fillRect(px + 2, py,      14, 13);
+
+  // Eyes (cyan glow)
+  ctx.fillStyle   = '#00fff7';
+  ctx.shadowColor = '#00fff7'; ctx.shadowBlur = 10;
+  ctx.fillRect(px + 3,  py + 4, 3, 3);
+  ctx.fillRect(px + 10, py + 4, 3, 3);
+
+  // Mouth — small dark line
+  ctx.fillStyle   = '#3d1799';
+  ctx.shadowBlur  = 0;
+  ctx.fillRect(px + 5, py + 9, 6, 1);
+
   // Body
-  ctx.fillStyle = '#b098e8';
-  ctx.shadowColor = '#7b2fff';
-  ctx.shadowBlur = 12;
-  ctx.fillRect(px + 1, py + 9, 12, 7);
-  // Arms / wires extending
-  ctx.fillStyle = '#7b2fff';
-  ctx.fillRect(px - 4, py + 10, 5, 1);
-  ctx.fillRect(px + 13, py + 10, 5, 1);
-  // Wire extension dots
-  ctx.fillStyle = '#00fff7';
-  ctx.shadowColor = '#00fff7';
-  ctx.shadowBlur = 6;
-  ctx.fillRect(px - 5, py + 10, 1, 1);
-  ctx.fillRect(px + 18, py + 10, 1, 1);
+  ctx.fillStyle   = '#b098e8';
+  ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 14;
+  ctx.fillRect(px + 1, py + 12, 16, 9);
+
+  // Bear ear nubs
+  ctx.fillStyle = '#c8b8ff';
+  ctx.fillRect(px + 2,  py - 3, 4, 4);
+  ctx.fillRect(px + 12, py - 3, 4, 4);
+
+  // Wire arms extending left + right
+  ctx.fillStyle   = '#7b2fff';
+  ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 6;
+  ctx.fillRect(px - 7, py + 13, 8, 2);
+  ctx.fillRect(px + 17, py + 13, 8, 2);
+
+  // Wire end nodes
+  ctx.fillStyle   = '#00fff7';
+  ctx.shadowColor = '#00fff7'; ctx.shadowBlur = 8;
+  ctx.fillRect(px - 9,  py + 13, 2, 2);
+  ctx.fillRect(px + 25, py + 13, 2, 2);
 
   ctx.shadowBlur = 0;
-
   if (bird.glitchTimer > 0) bird.glitchTimer--;
 }
 
+// ─────────────────────────────────────────────
+//  DRAW — PARTICLES
+// ─────────────────────────────────────────────
 function drawParticles() {
   particles.forEach(p => {
     ctx.globalAlpha = p.life;
-    ctx.fillStyle = p.color;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur = 8;
+    ctx.fillStyle   = p.color;
+    ctx.shadowColor = p.color; ctx.shadowBlur = 10;
     ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
   });
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 }
 
+// ─────────────────────────────────────────────
+//  DRAW — FLOOR
+// ─────────────────────────────────────────────
 function drawFloor(t) {
-  // Scrolling circuit floor
-  const floorY = H - 28;
+  const fy = H - 36;
   ctx.fillStyle = '#0d0524';
-  ctx.fillRect(0, floorY, W, 28);
+  ctx.fillRect(0, fy, W, 36);
 
-  ctx.strokeStyle = '#7b2fff';
-  ctx.shadowColor = '#7b2fff';
-  ctx.shadowBlur = 6;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, floorY);
-  ctx.lineTo(W, floorY);
-  ctx.stroke();
+  ctx.strokeStyle = '#7b2fff'; ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 8;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(0, fy); ctx.lineTo(W, fy); ctx.stroke();
 
-  // Scrolling circuit dots
-  ctx.shadowColor = '#00fff7';
-  ctx.shadowBlur = 4;
-  ctx.fillStyle = '#00fff7';
-  const dotSpacing = 30;
-  const offset = (t * PIPE_SPEED * 0.5) % dotSpacing;
-  for (let x = -dotSpacing + offset; x < W + dotSpacing; x += dotSpacing) {
-    ctx.fillRect(x, floorY + 8, 2, 2);
-    ctx.fillRect(x + 10, floorY + 16, 2, 2);
+  // Scrolling dots
+  ctx.fillStyle = '#00fff7'; ctx.shadowColor = '#00fff7'; ctx.shadowBlur = 5;
+  const sp = 36;
+  const off = (t * PIPE_SPEED * 0.5) % sp;
+  for (let x = -sp + off; x < W + sp; x += sp) {
+    ctx.fillRect(x,      fy + 10, 3, 3);
+    ctx.fillRect(x + 14, fy + 22, 3, 3);
   }
-
   ctx.shadowBlur = 0;
 }
 
+// ─────────────────────────────────────────────
+//  DRAW — INGAME SCORE
+// ─────────────────────────────────────────────
 function drawScoreIngame() {
   if (state !== 'playing') return;
-  ctx.font = '28px VT323, monospace';
+  ctx.font      = '38px VT323, monospace';
   ctx.fillStyle = '#7b2fff';
-  ctx.shadowColor = '#7b2fff';
-  ctx.shadowBlur = 10;
+  ctx.shadowColor = '#7b2fff'; ctx.shadowBlur = 12;
   ctx.textAlign = 'center';
-  ctx.fillText(String(score).padStart(3,'0'), W / 2, 40);
+  ctx.fillText(String(score).padStart(3,'0'), W / 2, 52);
   ctx.shadowBlur = 0;
 }
 
-// ---- GAME LOOP ----
-
+// ─────────────────────────────────────────────
+//  UPDATE
+// ─────────────────────────────────────────────
 function update(t) {
-  bgTimer = t;
-
+  bgTick = t;
   if (state !== 'playing') return;
 
-  // Update bird — drift down constantly, lift up while space held
-  if (spaceHeld && state === 'playing') {
+  // Physics
+  if (spaceHeld) {
     bird.vy = bird.liftForce;
-    if (Math.random() < 0.25) spawnJumpParticles();
-    if (Math.random() < 0.08) soundLift();
+    if (Math.random() < 0.3)  spawnLiftParticles();
+    if (Math.random() < 0.09) soundLift();
   } else {
     bird.vy = bird.drift;
   }
@@ -827,103 +835,87 @@ function update(t) {
 
   // Trail
   bird.trail.push({ x: bird.x, y: bird.y });
-  if (bird.trail.length > 10) bird.trail.shift();
+  if (bird.trail.length > 12) bird.trail.shift();
 
-  // Ceiling / floor
-  if (bird.y < 10) { bird.y = 10; bird.vy = 0; }
-  if (bird.y > H - 28 - bird.h / 2) { die(); return; }
+  // Bounds
+  if (bird.y < 12)             { bird.y = 12; }
+  if (bird.y > H - 36 - bird.h / 2) { die(); return; }
 
   // Pipes
   pipeTimer++;
-  if (pipeTimer >= PIPE_INTERVAL) {
-    addPipe();
-    pipeTimer = 0;
-  }
-
-  pipes = pipes.filter(p => p.x + PIPE_W + 10 > 0);
+  if (pipeTimer >= PIPE_INTVL) { addPipe(); pipeTimer = 0; }
+  pipes = pipes.filter(p => p.x + PIPE_W + 12 > 0);
 
   for (const p of pipes) {
     p.x -= PIPE_SPEED;
-
-    // Score
     if (!p.scored && p.x + PIPE_W < bird.x - bird.w / 2) {
       p.scored = true;
       score++;
       soundScore();
+      spawnScoreParticles();
+      p.glitch = 5;
       updateHUD();
-      p.glitch = 4; // brief glitch on score
-      // spawn score particles
-      for (let i = 0; i < 8; i++) {
-        particles.push({
-          x: bird.x, y: bird.y,
-          vx: (Math.random() - 0.5) * 5,
-          vy: (Math.random() - 0.5) * 5,
-          life: 1,
-          decay: 0.05,
-          color: '#00ff88',
-          size: Math.random() * 4 + 1,
-        });
-      }
     }
-
     if (checkCollision(p)) { die(); return; }
   }
 
   // Particles
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life -= p.decay;
-  });
+  particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life -= p.decay; });
   particles = particles.filter(p => p.life > 0);
 }
 
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
 function render(t) {
   ctx.clearRect(0, 0, W, H);
   drawBackground(t);
-  pipes.forEach(p => drawPipe(p, t));
+  pipes.forEach(drawPipe);
   drawFloor(t);
   drawParticles();
-  if (state !== 'start') drawBird(t);
+  if (state !== 'start') drawBird();
   drawScoreIngame();
 }
 
+// ─────────────────────────────────────────────
+//  LOOP
+// ─────────────────────────────────────────────
 function loop(t) {
   update(t);
   render(t);
-  animFrame = requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 }
 
-// Controls
+// ─────────────────────────────────────────────
+//  CONTROLS
+// ─────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.code === 'Space' || e.key === ' ') {
-    e.preventDefault();
-    if (state === 'start' || state === 'dead') { jump(); return; }
-    spaceHeld = true;
-  }
+  if (e.code !== 'Space' && e.key !== ' ') return;
+  e.preventDefault();
+  if (state === 'start' || state === 'dead') { jump(); return; }
+  spaceHeld = true;
 });
 document.addEventListener('keyup', e => {
-  if (e.code === 'Space' || e.key === ' ') {
-    spaceHeld = false;
-  }
+  if (e.code === 'Space' || e.key === ' ') spaceHeld = false;
 });
 document.addEventListener('touchstart', e => {
   e.preventDefault();
   if (state === 'start' || state === 'dead') { jump(); return; }
   spaceHeld = true;
 }, { passive: false });
-document.addEventListener('touchend', e => {
-  spaceHeld = false;
-});
+document.addEventListener('touchend',  () => { spaceHeld = false; });
 canvas.addEventListener('mousedown', e => {
   if (state === 'start' || state === 'dead') { jump(); return; }
   spaceHeld = true;
 });
 canvas.addEventListener('mouseup', () => { spaceHeld = false; });
 
-// Init
+// ─────────────────────────────────────────────
+//  GO
+// ─────────────────────────────────────────────
 init();
-animFrame = requestAnimationFrame(loop);
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
+v

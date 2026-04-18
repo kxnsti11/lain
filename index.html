@@ -273,8 +273,8 @@ let lastTime = 0;
 const bird = {
   x: 80, y: H / 2,
   vy: 0,
-  drift: 1.8,       // constant downward speed when not pressing space
-  liftForce: -2.2,  // upward velocity applied each frame space is held
+  drift: 1.3,       // constant downward speed when not pressing space
+  liftForce: -1.8,  // upward velocity applied each frame space is held
   w: 22, h: 22,
   trail: [],
   glitchTimer: 0,
@@ -285,10 +285,10 @@ let spaceHeld = false;
 // Pipes
 let pipes = [];
 const PIPE_W = 52;
-const GAP = 145;
-const PIPE_SPEED = 2.4;
+const GAP = 172;
+const PIPE_SPEED = 1.9;
 let pipeTimer = 0;
-const PIPE_INTERVAL = 90; // frames
+const PIPE_INTERVAL = 110; // frames
 
 // Background elements
 let bgStars = [];
@@ -347,13 +347,16 @@ function resetGame() {
 function jump() {
   if (state === 'start') {
     state = 'playing';
+    soundStart();
     document.getElementById('start-screen').classList.add('hidden');
     return;
   }
   if (state === 'dead') {
+    if (deadScreenAnimating) return; // don't allow restart mid-animation
     document.getElementById('dead-screen').classList.add('hidden');
     resetGame();
     state = 'playing';
+    soundStart();
     return;
   }
 }
@@ -413,6 +416,7 @@ function checkCollision(pipe) {
 
 function die() {
   state = 'dead';
+  soundDie();
   spawnDeathParticles();
   // Glitch text flash
   const gt = document.getElementById('glitch-text');
@@ -425,7 +429,117 @@ function die() {
   const qs = document.getElementById('dead-score');
   qs.textContent = `SCORE: ${String(score).padStart(3,'0')}  |  BEST: ${String(best).padStart(3,'0')}`;
   document.getElementById('death-quote').textContent = quotes[Math.floor(Math.random()*quotes.length)];
-  document.getElementById('dead-screen').classList.remove('hidden');
+
+  // Delay the screen slightly so death particles are visible first
+  setTimeout(() => showDeadScreenAnimated(), 420);
+}
+
+// ---- AUDIO ENGINE ----
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, type, duration, vol, startFreq) {
+  try {
+    const ac = getAudio();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.type = type;
+    if (startFreq) {
+      osc.frequency.setValueAtTime(startFreq, ac.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(freq, ac.currentTime + duration);
+    } else {
+      osc.frequency.setValueAtTime(freq, ac.currentTime);
+    }
+    gain.gain.setValueAtTime(vol, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
+    osc.start(ac.currentTime);
+    osc.stop(ac.currentTime + duration);
+  } catch(e) {}
+}
+
+function playNoise(duration, vol) {
+  try {
+    const ac = getAudio();
+    const bufSize = ac.sampleRate * duration;
+    const buf = ac.createBuffer(1, bufSize, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const gain = ac.createGain();
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 800;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+    gain.gain.setValueAtTime(vol, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
+    src.start();
+    src.stop(ac.currentTime + duration);
+  } catch(e) {}
+}
+
+function soundStart() {
+  // Rising wired-connect tone sequence
+  playTone(220, 'square', 0.08, 0.15);
+  setTimeout(() => playTone(330, 'square', 0.08, 0.15), 80);
+  setTimeout(() => playTone(440, 'square', 0.08, 0.15), 160);
+  setTimeout(() => playTone(660, 'sine', 0.25, 0.2), 240);
+  setTimeout(() => playTone(880, 'sine', 0.4, 0.15), 380);
+}
+
+function soundLift() {
+  playTone(300, 'square', 0.06, 0.04);
+}
+
+function soundScore() {
+  playTone(660, 'sine', 0.12, 0.12);
+  setTimeout(() => playTone(880, 'sine', 0.18, 0.1), 100);
+}
+
+function soundDie() {
+  // Distorted crash + signal lost descending tone
+  playNoise(0.18, 0.3);
+  playTone(440, 'sawtooth', 0.6, 0.2, 880);
+  setTimeout(() => playTone(200, 'sawtooth', 0.4, 0.15, 400), 100);
+  setTimeout(() => playTone(80, 'sine', 0.5, 0.1, 200), 280);
+  setTimeout(() => playNoise(0.1, 0.1), 400);
+}
+
+// ---- DEATH SCREEN ANIMATION ----
+let deadScreenAlpha = 0;
+let deadScreenAnimating = false;
+
+function showDeadScreenAnimated() {
+  deadScreenAlpha = 0;
+  deadScreenAnimating = true;
+  const el = document.getElementById('dead-screen');
+  el.classList.remove('hidden');
+  el.style.opacity = '0';
+  el.style.transition = 'none';
+
+  // Animate alpha via JS for precise CRT-glitch feel
+  let frame = 0;
+  function animStep() {
+    frame++;
+    // Glitchy flicker for first 20 frames, then smooth fade
+    if (frame < 20) {
+      const flicker = frame % 3 === 0 ? 0 : Math.min(frame / 20, 1) * (0.3 + Math.random() * 0.5);
+      el.style.opacity = flicker;
+    } else {
+      const progress = (frame - 20) / 40;
+      el.style.opacity = Math.min(progress, 1);
+      if (progress >= 1) { el.style.opacity = 1; deadScreenAnimating = false; return; }
+    }
+    requestAnimationFrame(animStep);
+  }
+  requestAnimationFrame(animStep);
 }
 
 function updateHUD() {
@@ -705,6 +819,7 @@ function update(t) {
   if (spaceHeld && state === 'playing') {
     bird.vy = bird.liftForce;
     if (Math.random() < 0.25) spawnJumpParticles();
+    if (Math.random() < 0.08) soundLift();
   } else {
     bird.vy = bird.drift;
   }
@@ -734,6 +849,7 @@ function update(t) {
     if (!p.scored && p.x + PIPE_W < bird.x - bird.w / 2) {
       p.scored = true;
       score++;
+      soundScore();
       updateHUD();
       p.glitch = 4; // brief glitch on score
       // spawn score particles

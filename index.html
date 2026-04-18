@@ -212,6 +212,61 @@
     pointer-events: none;
     transition: opacity 0.05s;
   }
+
+  #fs-btn {
+    background: none;
+    border: 1px solid var(--wired-dim);
+    color: var(--wired);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    letter-spacing: 2px;
+    padding: 2px 14px 4px;
+    cursor: pointer;
+    text-shadow: var(--glow-purple);
+    box-shadow: 0 0 8px #7b2fff33;
+    transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  }
+  #fs-btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    box-shadow: 0 0 14px #00fff744;
+  }
+
+  /* Fullscreen: canvas fills viewport, hide outer HUD chrome */
+  :fullscreen body,
+  :-webkit-full-screen body {
+    background: #05030f;
+  }
+  :fullscreen #wrapper,
+  :-webkit-full-screen #wrapper {
+    height: 100vh;
+    justify-content: center;
+    gap: 0;
+  }
+  :fullscreen #hud-top,
+  :-webkit-full-screen #hud-top,
+  :fullscreen #hud-bottom,
+  :-webkit-full-screen #hud-bottom {
+    display: none;
+  }
+  :fullscreen #canvas-container,
+  :-webkit-full-screen #canvas-container {
+    border: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+  :fullscreen canvas,
+  :-webkit-full-screen canvas {
+    width: auto;
+    height: 100vh;
+    max-width: 100vw;
+    object-fit: contain;
+  }
 </style>
 </head>
 <body>
@@ -252,6 +307,7 @@
 
   <div id="hud-bottom">
     <span>LAYER:01 // PRESENT DAY</span>
+    <button id="fs-btn" onclick="toggleFS()">[ FULLSCREEN ]</button>
     <span>NAVI_OS v6.6.6</span>
   </div>
 </div>
@@ -911,6 +967,25 @@ canvas.addEventListener('mousedown', e => {
 canvas.addEventListener('mouseup', () => { spaceHeld = false; });
 
 // ─────────────────────────────────────────────
+//  FULLSCREEN
+// ─────────────────────────────────────────────
+function toggleFS() {
+  const el = document.documentElement;
+  const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+  if (!isFS) {
+    (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  }
+}
+document.addEventListener('fullscreenchange',       updateFSBtn);
+document.addEventListener('webkitfullscreenchange', updateFSBtn);
+function updateFSBtn() {
+  const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+  document.getElementById('fs-btn').textContent = isFS ? '[ EXIT FULL ]' : '[ FULLSCREEN ]';
+}
+
+// ─────────────────────────────────────────────
 //  GO
 // ─────────────────────────────────────────────
 init();
@@ -918,4 +993,3 @@ requestAnimationFrame(loop);
 </script>
 </body>
 </html>
-v

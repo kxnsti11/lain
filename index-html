@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLAPPY LAIN // THE WIRED</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323:wght@400&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --dark: #05050a;
+    --wired: #7b2fff;
+    --wired-dim: #3d1799;
+    --cyan: #00fff7;
+    --cyan-dim: #004d4a;
+    --red: #ff2266;
+    --green: #00ff88;
+    --text: #c8b8ff;
+    --pipe: #1a0a3a;
+    --pipe-edge: #7b2fff;
+    --glow-purple: 0 0 8px #7b2fff, 0 0 20px #3d179966;
+    --glow-cyan: 0 0 8px #00fff7, 0 0 20px #00fff766;
+    --glow-red: 0 0 8px #ff2266, 0 0 20px #ff226666;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text);
+  }
+
+  /* CRT scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.18) 2px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* CRT flicker */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(123,47,255,0.03);
+    pointer-events: none;
+    z-index: 9998;
+    animation: flicker 8s infinite;
+  }
+
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.4; }
+    94% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+  }
+
+  #wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #hud-top {
+    width: 400px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    letter-spacing: 2px;
+  }
+
+  #canvas-container {
+    position: relative;
+    border: 1px solid var(--wired-dim);
+    box-shadow: 0 0 30px #7b2fff44, inset 0 0 30px #05050a88;
+  }
+
+  canvas {
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  #hud-bottom {
+    width: 400px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--wired-dim);
+    letter-spacing: 1px;
+  }
+
+  /* Overlay screens */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5,5,10,0.92);
+    z-index: 10;
+    gap: 18px;
+    padding: 30px;
+  }
+
+  .screen.hidden { display: none; }
+
+  .screen-title {
+    font-family: 'VT323', monospace;
+    font-size: 52px;
+    color: var(--wired);
+    text-shadow: var(--glow-purple);
+    text-align: center;
+    line-height: 1;
+    animation: pulse-title 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-title {
+    0%,100% { text-shadow: 0 0 8px #7b2fff, 0 0 30px #7b2fff88; }
+    50% { text-shadow: 0 0 15px #7b2fff, 0 0 50px #7b2fffaa, 0 0 80px #7b2fff44; }
+  }
+
+  .screen-sub {
+    font-family: 'VT323', monospace;
+    font-size: 26px;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    text-align: center;
+    letter-spacing: 3px;
+  }
+
+  .screen-text {
+    font-size: 12px;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.8;
+    max-width: 300px;
+    opacity: 0.7;
+  }
+
+  .lain-quote {
+    font-size: 13px;
+    color: var(--wired);
+    text-align: center;
+    font-style: italic;
+    opacity: 0.6;
+    max-width: 300px;
+    line-height: 1.6;
+  }
+
+  .blink-prompt {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green);
+    animation: blink 1.2s step-end infinite;
+    letter-spacing: 2px;
+  }
+
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .score-display {
+    font-family: 'VT323', monospace;
+    font-size: 36px;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    text-align: center;
+  }
+
+  .divider {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--wired-dim), transparent);
+  }
+
+  #glitch-text {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    color: var(--red);
+    text-shadow: var(--glow-red);
+    opacity: 0;
+    letter-spacing: 4px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+  <div id="hud-top">
+    <span>SCORE: <span id="score-display">000</span></span>
+    <span>BEST: <span id="best-display">000</span></span>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="canvas" width="400" height="550"></canvas>
+
+    <!-- START SCREEN -->
+    <div class="screen" id="start-screen">
+      <div class="screen-title">FLAPPY<br>LAIN</div>
+      <div class="screen-sub">// THE WIRED //</div>
+      <div class="divider"></div>
+      <div class="lain-quote">"No matter where you go, everybody's connected."</div>
+      <div class="divider"></div>
+      <div class="blink-prompt">[ SPACE ] TO ENTER</div>
+      <div class="screen-text">Navigate the barriers of the Wired.<br>Don't let them disconnect you.</div>
+    </div>
+
+    <!-- DEAD SCREEN -->
+    <div class="screen hidden" id="dead-screen">
+      <div class="screen-title" style="color: var(--red); text-shadow: var(--glow-red);">DISCONNECTED</div>
+      <div class="screen-sub" style="color: var(--red);">// SIGNAL LOST //</div>
+      <div class="divider"></div>
+      <div class="score-display" id="dead-score"></div>
+      <div class="lain-quote" id="death-quote"></div>
+      <div class="divider"></div>
+      <div class="blink-prompt">[ SPACE ] RECONNECT</div>
+    </div>
+
+    <div id="glitch-text">BARRIER BREACH</div>
+  </div>
+
+  <div id="hud-bottom">
+    <span>LAYER:01 // PRESENT DAY</span>
+    <span>NAVI_OS v6.6.6</span>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// Game state
+let state = 'start'; // start, playing, dead
+let score = 0, best = 0;
+let animFrame;
+let lastTime = 0;
+
+// Bird
+const bird = {
+  x: 80, y: H / 2,
+  vy: 0,
+  drift: 1.8,       // constant downward speed when not pressing space
+  liftForce: -2.2,  // upward velocity applied each frame space is held
+  w: 22, h: 22,
+  trail: [],
+  glitchTimer: 0,
+};
+
+let spaceHeld = false;
+
+// Pipes
+let pipes = [];
+const PIPE_W = 52;
+const GAP = 145;
+const PIPE_SPEED = 2.4;
+let pipeTimer = 0;
+const PIPE_INTERVAL = 90; // frames
+
+// Background elements
+let bgStars = [];
+let bgWires = [];
+let bgTimer = 0;
+let particles = [];
+
+// Lain death quotes
+const quotes = [
+  '"Close this world, open the next."',
+  '"If you\'re not remembered, you never existed."',
+  '"The border between the real world and the Wired is becoming more and more ambiguous."',
+  '"Present day. Present time. Hahaha."',
+  '"The flesh is a device for the soul to be expressed through."',
+  '"Let\'s all love Lain."',
+  '"I am connected. Therefore I am."',
+];
+
+function init() {
+  // Generate background stars
+  bgStars = [];
+  for (let i = 0; i < 60; i++) {
+    bgStars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: Math.random() * 1.5 + 0.3,
+      flicker: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.3 + 0.1,
+    });
+  }
+  // Generate background wire lines (horizontal noise lines)
+  bgWires = [];
+  for (let i = 0; i < 8; i++) {
+    bgWires.push({
+      y: Math.random() * H,
+      opacity: Math.random() * 0.15 + 0.05,
+      speed: Math.random() * 0.4 + 0.2,
+      offset: Math.random() * W,
+    });
+  }
+}
+
+function resetGame() {
+  bird.x = 80;
+  bird.y = H / 2;
+  bird.vy = 0;
+  bird.trail = [];
+  bird.glitchTimer = 0;
+  pipes = [];
+  particles = [];
+  pipeTimer = 0;
+  score = 0;
+  updateHUD();
+}
+
+function jump() {
+  if (state === 'start') {
+    state = 'playing';
+    document.getElementById('start-screen').classList.add('hidden');
+    return;
+  }
+  if (state === 'dead') {
+    document.getElementById('dead-screen').classList.add('hidden');
+    resetGame();
+    state = 'playing';
+    return;
+  }
+}
+
+function spawnJumpParticles() {
+  for (let i = 0; i < 6; i++) {
+    particles.push({
+      x: bird.x, y: bird.y,
+      vx: (Math.random() - 0.5) * 3,
+      vy: (Math.random() - 0.5) * 3,
+      life: 1,
+      decay: Math.random() * 0.06 + 0.04,
+      color: Math.random() > 0.5 ? '#7b2fff' : '#00fff7',
+      size: Math.random() * 3 + 1,
+    });
+  }
+}
+
+function spawnDeathParticles() {
+  for (let i = 0; i < 30; i++) {
+    particles.push({
+      x: bird.x, y: bird.y,
+      vx: (Math.random() - 0.5) * 8,
+      vy: (Math.random() - 0.5) * 8,
+      life: 1,
+      decay: Math.random() * 0.025 + 0.01,
+      color: ['#ff2266','#7b2fff','#00fff7','#ffffff'][Math.floor(Math.random()*4)],
+      size: Math.random() * 5 + 1,
+    });
+  }
+}
+
+function addPipe() {
+  const minTop = 60;
+  const maxTop = H - GAP - 60;
+  const topH = Math.random() * (maxTop - minTop) + minTop;
+  pipes.push({
+    x: W + 10,
+    topH,
+    bottomY: topH + GAP,
+    scored: false,
+    glitch: 0,
+  });
+}
+
+function checkCollision(pipe) {
+  const bx = bird.x - bird.w / 2 + 3;
+  const by = bird.y - bird.h / 2 + 3;
+  const bw = bird.w - 6;
+  const bh = bird.h - 6;
+  // Top pipe
+  if (bx < pipe.x + PIPE_W && bx + bw > pipe.x) {
+    if (by < pipe.topH || by + bh > pipe.bottomY) return true;
+  }
+  return false;
+}
+
+function die() {
+  state = 'dead';
+  spawnDeathParticles();
+  // Glitch text flash
+  const gt = document.getElementById('glitch-text');
+  gt.style.opacity = '1';
+  setTimeout(() => { gt.style.opacity = '0'; }, 600);
+
+  if (score > best) best = score;
+  updateHUD();
+
+  const qs = document.getElementById('dead-score');
+  qs.textContent = `SCORE: ${String(score).padStart(3,'0')}  |  BEST: ${String(best).padStart(3,'0')}`;
+  document.getElementById('death-quote').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+  document.getElementById('dead-screen').classList.remove('hidden');
+}
+
+function updateHUD() {
+  document.getElementById('score-display').textContent = String(score).padStart(3,'0');
+  document.getElementById('best-display').textContent = String(best).padStart(3,'0');
+}
+
+// ---- DRAW FUNCTIONS ----
+
+function drawBackground(t) {
+  // Base dark gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#05030f');
+  grad.addColorStop(0.5, '#0a0518');
+  grad.addColorStop(1, '#030210');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Stars with flicker
+  bgStars.forEach(s => {
+    const flick = 0.5 + 0.5 * Math.sin(t * 0.002 * s.speed + s.flicker);
+    ctx.globalAlpha = flick * 0.7;
+    ctx.fillStyle = Math.random() > 0.98 ? '#00fff7' : '#c8b8ff';
+    ctx.fillRect(s.x, s.y, s.size, s.size);
+  });
+  ctx.globalAlpha = 1;
+
+  // Horizontal wire lines (Lain aesthetic)
+  bgWires.forEach(w => {
+    const x = (w.offset - t * w.speed * 0.5) % (W * 1.5) - W * 0.25;
+    ctx.globalAlpha = w.opacity * (0.7 + 0.3 * Math.sin(t * 0.003));
+    ctx.strokeStyle = '#7b2fff';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, w.y);
+    ctx.lineTo(W, w.y);
+    ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // Occasional glitch horizontal lines
+  if (Math.random() < 0.015) {
+    const gy = Math.random() * H;
+    const gw = Math.random() * 120 + 20;
+    const gx = Math.random() * (W - gw);
+    ctx.globalAlpha = Math.random() * 0.3;
+    ctx.fillStyle = Math.random() > 0.5 ? '#7b2fff' : '#00fff7';
+    ctx.fillRect(gx, gy, gw, Math.random() * 2 + 0.5);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function drawPipe(pipe, t) {
+  // Glitch the pipe occasionally
+  const gx = pipe.glitch > 0 ? (Math.random() - 0.5) * 4 : 0;
+  const px = pipe.x + gx;
+
+  // Top pipe body
+  const pg1 = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
+  pg1.addColorStop(0, '#0d0524');
+  pg1.addColorStop(0.3, '#1a0a3a');
+  pg1.addColorStop(1, '#0a0318');
+  ctx.fillStyle = pg1;
+  ctx.fillRect(px, 0, PIPE_W, pipe.topH);
+
+  // Top pipe decorative lines
+  for (let i = 0; i < 3; i++) {
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#7b2fff';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(px + 8 + i * 14, 0);
+    ctx.lineTo(px + 8 + i * 14, pipe.topH);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // Top pipe right edge glow
+  ctx.shadowColor = '#7b2fff';
+  ctx.shadowBlur = 8;
+  ctx.strokeStyle = '#7b2fff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(px, 0);
+  ctx.lineTo(px, pipe.topH);
+  ctx.moveTo(px + PIPE_W, 0);
+  ctx.lineTo(px + PIPE_W, pipe.topH);
+  ctx.stroke();
+
+  // Top pipe mouth
+  ctx.fillStyle = '#1a0a3a';
+  ctx.fillRect(px - 4, pipe.topH - 16, PIPE_W + 8, 16);
+  ctx.strokeStyle = '#00fff7';
+  ctx.lineWidth = 1;
+  ctx.shadowColor = '#00fff7';
+  ctx.shadowBlur = 6;
+  ctx.strokeRect(px - 4, pipe.topH - 16, PIPE_W + 8, 16);
+
+  // Bottom pipe
+  const pg2 = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
+  pg2.addColorStop(0, '#0d0524');
+  pg2.addColorStop(0.3, '#1a0a3a');
+  pg2.addColorStop(1, '#0a0318');
+  ctx.fillStyle = pg2;
+  ctx.shadowBlur = 0;
+  ctx.fillRect(px, pipe.bottomY, PIPE_W, H - pipe.bottomY);
+
+  for (let i = 0; i < 3; i++) {
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#7b2fff';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(px + 8 + i * 14, pipe.bottomY);
+    ctx.lineTo(px + 8 + i * 14, H);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.shadowColor = '#7b2fff';
+  ctx.shadowBlur = 8;
+  ctx.strokeStyle = '#7b2fff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(px, pipe.bottomY);
+  ctx.lineTo(px, H);
+  ctx.moveTo(px + PIPE_W, pipe.bottomY);
+  ctx.lineTo(px + PIPE_W, H);
+  ctx.stroke();
+
+  ctx.fillStyle = '#1a0a3a';
+  ctx.fillRect(px - 4, pipe.bottomY, PIPE_W + 8, 16);
+  ctx.shadowColor = '#00fff7';
+  ctx.shadowBlur = 6;
+  ctx.strokeStyle = '#00fff7';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(px - 4, pipe.bottomY, PIPE_W + 8, 16);
+
+  ctx.shadowBlur = 0;
+
+  // Circuit trace decoration in gap
+  const midGap = pipe.topH + GAP / 2;
+  ctx.globalAlpha = 0.12;
+  ctx.strokeStyle = '#7b2fff';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 6]);
+  ctx.beginPath();
+  ctx.moveTo(px - 4, midGap);
+  ctx.lineTo(px + PIPE_W + 4, midGap);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  if (pipe.glitch > 0) pipe.glitch--;
+}
+
+function drawBird(t) {
+  // Trail
+  bird.trail.forEach((pos, i) => {
+    const a = (i / bird.trail.length) * 0.5;
+    ctx.globalAlpha = a;
+    ctx.fillStyle = '#7b2fff';
+    ctx.shadowColor = '#7b2fff';
+    ctx.shadowBlur = 6;
+    ctx.fillRect(pos.x - 3, pos.y - 3, 6, 6);
+  });
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
+
+  const bx = bird.x;
+  const by = bird.y;
+
+  // Glitch offset
+  const goff = bird.glitchTimer > 0 ? (Math.random() - 0.5) * 4 : 0;
+
+  // Bird body — pixelated Lain-head silhouette
+  // Outer glow
+  ctx.shadowColor = '#7b2fff';
+  ctx.shadowBlur = 16;
+
+  // Body
+  ctx.fillStyle = '#c8b8ff';
+  // Pixel art 14x14 "character" shape
+  const px = Math.floor(bx - 9 + goff);
+  const py = Math.floor(by - 9 + (bird.vy * 0.3));
+
+  // Draw a simple pixel character
+  // Head
+  ctx.fillStyle = '#e8d8ff';
+  ctx.fillRect(px + 2, py, 10, 10);
+  // Eyes — two cyan dots
+  ctx.fillStyle = '#00fff7';
+  ctx.shadowColor = '#00fff7';
+  ctx.shadowBlur = 8;
+  ctx.fillRect(px + 3, py + 3, 2, 2);
+  ctx.fillRect(px + 8, py + 3, 2, 2);
+  // Body
+  ctx.fillStyle = '#b098e8';
+  ctx.shadowColor = '#7b2fff';
+  ctx.shadowBlur = 12;
+  ctx.fillRect(px + 1, py + 9, 12, 7);
+  // Arms / wires extending
+  ctx.fillStyle = '#7b2fff';
+  ctx.fillRect(px - 4, py + 10, 5, 1);
+  ctx.fillRect(px + 13, py + 10, 5, 1);
+  // Wire extension dots
+  ctx.fillStyle = '#00fff7';
+  ctx.shadowColor = '#00fff7';
+  ctx.shadowBlur = 6;
+  ctx.fillRect(px - 5, py + 10, 1, 1);
+  ctx.fillRect(px + 18, py + 10, 1, 1);
+
+  ctx.shadowBlur = 0;
+
+  if (bird.glitchTimer > 0) bird.glitchTimer--;
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 8;
+    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+  });
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
+}
+
+function drawFloor(t) {
+  // Scrolling circuit floor
+  const floorY = H - 28;
+  ctx.fillStyle = '#0d0524';
+  ctx.fillRect(0, floorY, W, 28);
+
+  ctx.strokeStyle = '#7b2fff';
+  ctx.shadowColor = '#7b2fff';
+  ctx.shadowBlur = 6;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, floorY);
+  ctx.lineTo(W, floorY);
+  ctx.stroke();
+
+  // Scrolling circuit dots
+  ctx.shadowColor = '#00fff7';
+  ctx.shadowBlur = 4;
+  ctx.fillStyle = '#00fff7';
+  const dotSpacing = 30;
+  const offset = (t * PIPE_SPEED * 0.5) % dotSpacing;
+  for (let x = -dotSpacing + offset; x < W + dotSpacing; x += dotSpacing) {
+    ctx.fillRect(x, floorY + 8, 2, 2);
+    ctx.fillRect(x + 10, floorY + 16, 2, 2);
+  }
+
+  ctx.shadowBlur = 0;
+}
+
+function drawScoreIngame() {
+  if (state !== 'playing') return;
+  ctx.font = '28px VT323, monospace';
+  ctx.fillStyle = '#7b2fff';
+  ctx.shadowColor = '#7b2fff';
+  ctx.shadowBlur = 10;
+  ctx.textAlign = 'center';
+  ctx.fillText(String(score).padStart(3,'0'), W / 2, 40);
+  ctx.shadowBlur = 0;
+}
+
+// ---- GAME LOOP ----
+
+function update(t) {
+  bgTimer = t;
+
+  if (state !== 'playing') return;
+
+  // Update bird — drift down constantly, lift up while space held
+  if (spaceHeld && state === 'playing') {
+    bird.vy = bird.liftForce;
+    if (Math.random() < 0.25) spawnJumpParticles();
+  } else {
+    bird.vy = bird.drift;
+  }
+  bird.y += bird.vy;
+
+  // Trail
+  bird.trail.push({ x: bird.x, y: bird.y });
+  if (bird.trail.length > 10) bird.trail.shift();
+
+  // Ceiling / floor
+  if (bird.y < 10) { bird.y = 10; bird.vy = 0; }
+  if (bird.y > H - 28 - bird.h / 2) { die(); return; }
+
+  // Pipes
+  pipeTimer++;
+  if (pipeTimer >= PIPE_INTERVAL) {
+    addPipe();
+    pipeTimer = 0;
+  }
+
+  pipes = pipes.filter(p => p.x + PIPE_W + 10 > 0);
+
+  for (const p of pipes) {
+    p.x -= PIPE_SPEED;
+
+    // Score
+    if (!p.scored && p.x + PIPE_W < bird.x - bird.w / 2) {
+      p.scored = true;
+      score++;
+      updateHUD();
+      p.glitch = 4; // brief glitch on score
+      // spawn score particles
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x: bird.x, y: bird.y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5,
+          life: 1,
+          decay: 0.05,
+          color: '#00ff88',
+          size: Math.random() * 4 + 1,
+        });
+      }
+    }
+
+    if (checkCollision(p)) { die(); return; }
+  }
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= p.decay;
+  });
+  particles = particles.filter(p => p.life > 0);
+}
+
+function render(t) {
+  ctx.clearRect(0, 0, W, H);
+  drawBackground(t);
+  pipes.forEach(p => drawPipe(p, t));
+  drawFloor(t);
+  drawParticles();
+  if (state !== 'start') drawBird(t);
+  drawScoreIngame();
+}
+
+function loop(t) {
+  update(t);
+  render(t);
+  animFrame = requestAnimationFrame(loop);
+}
+
+// Controls
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.key === ' ') {
+    e.preventDefault();
+    if (state === 'start' || state === 'dead') { jump(); return; }
+    spaceHeld = true;
+  }
+});
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space' || e.key === ' ') {
+    spaceHeld = false;
+  }
+});
+document.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (state === 'start' || state === 'dead') { jump(); return; }
+  spaceHeld = true;
+}, { passive: false });
+document.addEventListener('touchend', e => {
+  spaceHeld = false;
+});
+canvas.addEventListener('mousedown', e => {
+  if (state === 'start' || state === 'dead') { jump(); return; }
+  spaceHeld = true;
+});
+canvas.addEventListener('mouseup', () => { spaceHeld = false; });
+
+// Init
+init();
+animFrame = requestAnimationFrame(loop);
+</script>
+</body>
+</html>
